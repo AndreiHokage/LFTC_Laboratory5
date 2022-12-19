@@ -1,0 +1,14 @@
+S->E
+E->E+T
+E->T
+T->T*F
+T->F
+F->i
+F->(E)
+i+(i*i)
+i+i+i
+i+i*(i+i)+i
+i++i**i
+i++
+iiii
+i

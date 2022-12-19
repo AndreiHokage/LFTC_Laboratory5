@@ -136,7 +136,7 @@ public class SemanticAnalyzer {
                         ans.add(rule);
                     }
                     Collections.reverse(ans);
-                    for(String el: ans) System.out.println(el);
+                    //for(String el: ans) System.out.println(el);
                     return ans;
                 }
 

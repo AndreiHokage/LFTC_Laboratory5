@@ -1,0 +1,10 @@
+S->+SS
+S->-SS
+S->a
++a-aa
++a-aa--aa
+aaaaa
++a-a+a+a-aa
++a-a
++-aaa
+a+a-a+a

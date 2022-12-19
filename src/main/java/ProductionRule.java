@@ -23,4 +23,9 @@ public class ProductionRule {
     public void setRightHand(String rightHand) {
         this.rightHand = rightHand;
     }
+
+    @Override
+    public String toString() {
+        return leftHand + "->" + rightHand;
+    }
 }
