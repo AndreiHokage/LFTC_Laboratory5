@@ -103,7 +103,7 @@ public class SemanticAnalyzer {
         Stack<String> workStack = new Stack<>();
         workStack.push("eps");
         Stack<String> inputStack = new Stack<>();
-        inputStack.push("S");
+        inputStack.push(startSymbol);
         WorkConfiguration transitions = new WorkConfiguration("q", 1);
 
         while(true){

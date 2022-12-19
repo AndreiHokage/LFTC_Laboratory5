@@ -17,7 +17,7 @@ public class FileUtils {
                 line = bufferedReader.readLine();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("FILE DOES NOT EXIST!");
         }
         return list;
     }
