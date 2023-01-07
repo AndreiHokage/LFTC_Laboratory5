@@ -1,0 +1,27 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+    int suma;
+    int n;
+    int nr;
+    int i;
+
+    i = 0;
+    suma = 0;
+
+    cout << "n: ";
+    cin >> n;
+
+    while (i<n) {
+        cout << "nr: ";
+        cin >> nr;
+        suma = suma + nr;
+        i = i + 1;
+    }
+
+    cout << "Suma: ";
+    cout << suma;
+
+    return 0;
+}

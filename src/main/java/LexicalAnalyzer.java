@@ -41,19 +41,19 @@ public class LexicalAnalyzer {
 
         Scanner sc = new Scanner(file);
         Integer indexLine = 0;
-        while(sc.hasNextLine()) {
+        while (sc.hasNextLine()) {
             String line = sc.nextLine();
             line = line.trim();
             indexLine = indexLine + 1;
 
-            if(line.equals("") || line.charAt(0) == line.charAt(line.length() - 1) && line.charAt(0) == ' ')
+            if (line.equals("") || line.charAt(0) == line.charAt(line.length() - 1) && line.charAt(0) == ' ')
                 continue;
 
             Integer indexColumn = 0;
             Boolean flag = false;
-            while(line.length() > 0) {
+            while (line.length() > 0) {
                 Integer j = 0;
-                while(j < line.length() && line.charAt(j) == ' ') j++;
+                while (j < line.length() && line.charAt(j) == ' ') j++;
                 line = line.substring(j);
                 indexColumn += j;
 
@@ -69,7 +69,7 @@ public class LexicalAnalyzer {
                 }
 
                 String sequence = "";
-                if(!flag) {
+                if (!flag) {
                     // Identifiers identification
                     sequence = identifierStateMachine.findTheLongestPrefix(line);
                     if (sequence.length() > 0) {
@@ -94,10 +94,10 @@ public class LexicalAnalyzer {
                 }
 
                 // arithmetic operator identification
-                if(!flag) {
+                if (!flag) {
                     sequence = arithmeticOperatorStateMachine.findTheLongestPrefix(line);
                     if (sequence.length() > 0) {
-                        if(lexicalAtomTable.getCodeAtom(sequence) == null)
+                        if (lexicalAtomTable.getCodeAtom(sequence) == null)
                             lexicalAtomTable.addLexicalAtom(sequence);
                         fip.addEntry(lexicalAtomTable.getCodeAtom(sequence), constantsSymbolTable.getCodeFromSymbolTable(sequence));
                         flag = true;
@@ -105,10 +105,10 @@ public class LexicalAnalyzer {
                 }
 
                 // relation operator identification
-                if(!flag) {
+                if (!flag) {
                     sequence = relationalOperatorStateMachine.findTheLongestPrefix(line);
                     if (sequence.length() > 0) {
-                        if(lexicalAtomTable.getCodeAtom(sequence) == null)
+                        if (lexicalAtomTable.getCodeAtom(sequence) == null)
                             lexicalAtomTable.addLexicalAtom(sequence);
                         fip.addEntry(lexicalAtomTable.getCodeAtom(sequence), constantsSymbolTable.getCodeFromSymbolTable(sequence));
                         flag = true;
@@ -116,9 +116,9 @@ public class LexicalAnalyzer {
                 }
 
                 // delimitators identification
-                if(!flag) {
+                if (!flag) {
                     sequence = separatorsStateMachine.findTheLongestPrefix(line);
-                    if(lexicalAtomTable.getCodeAtom(sequence) == null)
+                    if (lexicalAtomTable.getCodeAtom(sequence) == null)
                         lexicalAtomTable.addLexicalAtom(sequence);
                     if (sequence.length() > 0) {
                         fip.addEntry(lexicalAtomTable.getCodeAtom(sequence), constantsSymbolTable.getCodeFromSymbolTable(sequence));
@@ -127,7 +127,7 @@ public class LexicalAnalyzer {
                 }
 
                 // error
-                if(flag == false)
+                if (flag == false)
                     throw new Exception("Lexical error on (line, column): ( " + indexLine + " , " + indexColumn + " )");
 
                 line = line.substring(sequence.length());
@@ -139,12 +139,12 @@ public class LexicalAnalyzer {
         writeToFiles();
     }
 
-    public List<Integer> getInputSequence(){
+    public List<Integer> getInputSequence() {
         return fip.getAtomCodeSequence();
     }
 
     private void writeToFiles() throws IOException {
-        String crt = "E:\\UBB-Didactic\\An 3\\LFTC\\Laborator12\\src\\main\\resources\\";
+        String crt = System.getProperty("user.dir") + "\\src\\main\\resources\\";
         FileWriter outputName = new FileWriter(crt + "atomLexicalTable.txt");
         PrintWriter fileWriter = new PrintWriter(outputName);
         fileWriter.println(lexicalAtomTable);

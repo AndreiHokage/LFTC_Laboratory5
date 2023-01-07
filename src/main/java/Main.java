@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 public class Main {
 
     private static AF readAFFromFile(String inputTXT) throws FileNotFoundException {
-        inputTXT = "E:\\UBB-Didactic\\An 3\\LFTC\\Laborator 5\\src\\main\\resources\\" + inputTXT;
+        inputTXT = System.getProperty("user.dir") + "\\src\\main\\resources\\" + inputTXT;
         InputStream inputFile = new FileInputStream(inputTXT);
         Scanner myReader = new Scanner(inputFile);
 
@@ -27,16 +27,16 @@ public class Main {
         List<String> elemFinalStates = Arrays.stream(finalStates.split(" ")).toList();
 
         List<Transition> transitions = new ArrayList<>();
-        while(myReader.hasNextLine()){
+        while (myReader.hasNextLine()) {
             String line = myReader.nextLine();
-            if(line.matches("^[ ]*$"))
+            if (line.matches("^[ ]*$"))
                 break;
             String[] words = line.split(" ");
             String source = words[0], destination = words[1];
             Integer index = 2;
-            while(index < words.length){
+            while (index < words.length) {
                 String inputAlphabet = words[index];
-                if(inputAlphabet.equals("space"))
+                if (inputAlphabet.equals("space"))
                     inputAlphabet = " ";
                 transitions.add(new Transition(source, destination, inputAlphabet));
 //                if(inputTXT.equals("D:\\UBB-Didactic\\An 3\\LFTC\\Laborator 5\\src\\main\\resources\\AF_literal.txt"))
@@ -55,7 +55,7 @@ public class Main {
         String currentDir = System.getProperty("user.dir") + "\\src\\main\\resources\\";
 
         System.out.print("Grammar file and input: ");
-        String file = currentDir + "grammar" + ".txt";
+        String file = currentDir + "grammar.txt";
 
         List<String> dataFromFile = FileUtils.readFromFile(file);
         List<ProductionRule> productionRules = dataFromFile.stream()
@@ -75,9 +75,9 @@ public class Main {
         LexicalAnalyzer lexicalAnalyzer = new LexicalAnalyzer(identifierStateMachine, literalStateMachineList,
                 relationalOperatorStateMachine, arithmeticOperatorStateMachine, separatorsStateMachine);
 
-        lexicalAnalyzer.analyze(new File("E:\\UBB-Didactic\\An 3\\LFTC\\Laborator12\\src\\main\\resources\\input.txt"));
+        lexicalAnalyzer.analyze(new File(System.getProperty("user.dir") + "\\src\\main\\resources\\input.txt"));
         List<Integer> inputSequence = lexicalAnalyzer.getInputSequence();
-        for(Integer x: inputSequence)
+        for (Integer x : inputSequence)
             System.out.print(x + " ");
         System.out.println();
 
