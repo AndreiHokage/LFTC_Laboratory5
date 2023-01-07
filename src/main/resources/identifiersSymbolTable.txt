@@ -1,0 +1,13 @@
+1 n 11
+2 answer 7
+3 kop 1
+4 sumaaa 10
+5 float 9
+6 x 8
+7 binary 5
+8 y -1
+9 i 3
+10 u 6
+11 o 12
+12 sum 4
+

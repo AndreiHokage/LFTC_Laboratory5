@@ -70,14 +70,17 @@ public class SemanticAnalyzer {
     }
 
     private String startSymbol;
-    private String inputSequence;
+    private List<Integer> inputSequence;
     private List<ProductionRule> productionRules;
     private HashMap<Pair, ProductionRule> hashMap = new HashMap<>();
+    private LexicalAtomTable lexicalAtomTable;
 
-    public SemanticAnalyzer(String inputSequence, List<ProductionRule> productionRules, String startSymbol) {
-        this.inputSequence = " " + inputSequence;
+    public SemanticAnalyzer(List<Integer> inputSequence, List<ProductionRule> productionRules, String startSymbol,
+                            LexicalAtomTable lexicalAtomTable) {
+        this.inputSequence = inputSequence;
         this.productionRules = productionRules;
         this.startSymbol = startSymbol;
+        this.lexicalAtomTable = lexicalAtomTable;
         Integer index = 1;
         String prev = "";
         for(ProductionRule productionRule: productionRules){
@@ -94,6 +97,17 @@ public class SemanticAnalyzer {
 //            System.out.println(el.getKey().leftMember + " " + el.getKey().indexOrder + " -> " + el.getValue().getRightHand());
     }
 
+    private String extractSymbol(String expr){
+        String ans = expr.substring(1,expr.length() - 1);
+        return expr;
+    }
+
+    private Boolean checkIsUnfinishedSymbol(String expr){
+        if(expr.charAt(0) == '`')
+            return true;
+        return false;
+    }
+
     /*
         Returns an empty list if the input sequence is not accepted by the grammat
         Otherwise, it returns a list of the production rules in the order they should be applied in order to
@@ -106,9 +120,9 @@ public class SemanticAnalyzer {
         inputStack.push(startSymbol);
         WorkConfiguration transitions = new WorkConfiguration("q", 1);
 
-        while(true){
+        while(true) {
 //            System.out.println("state= " + transitions.stateMachine);
-//            System.out.println("index= " + transitions.positionInput);
+//            System.out.println("index= " + lexicalAtomTable.getLexicalAtom( inputSequence.get(transitions.positionInput)) );
 //            System.out.println("--------------------WORK---------------------------");
 //            for(String el: workStack) System.out.println(el);
 //            System.out.println("--------------------INPUT---------------------------");
@@ -119,66 +133,76 @@ public class SemanticAnalyzer {
 //            } catch (IOException e) {
 //                e.printStackTrace();
 //            }
-            if(transitions.getStateMachine().equals("q")) {
+            if (transitions.getStateMachine().equals("q")) {
 
                 // success
-                if (transitions.getPositionInput().equals(inputSequence.length())) {
+                if (transitions.getPositionInput().equals(inputSequence.size())) {
                     List<String> ans = new ArrayList<>();
-                    while(!workStack.isEmpty()){
+                    while (!workStack.isEmpty()) {
                         String unfinishedSymbolPair = workStack.pop();
-                        if(unfinishedSymbolPair.equals("eps"))
+                        if (unfinishedSymbolPair.equals("eps"))
                             continue;
-                        if(unfinishedSymbolPair.length() == 1)
+                        if (("" + unfinishedSymbolPair.charAt(0)).equals("'"))
                             continue;
-                        String unfinishedSymbol = "" + unfinishedSymbolPair.charAt(0);
-                        Integer numberRule = Integer.parseInt(unfinishedSymbolPair.substring(1));
+                        int findDel = 1;
+                        while (findDel < unfinishedSymbolPair.length() && unfinishedSymbolPair.charAt(findDel) != '`')
+                            findDel++;
+                        findDel++;
+                        assert findDel < unfinishedSymbolPair.length();
+                        String unfinishedSymbol = unfinishedSymbolPair.substring(0, findDel);
+                        Integer numberRule = Integer.parseInt(unfinishedSymbolPair.substring(findDel));
                         String rule = unfinishedSymbol + " -> " + hashMap.get(new Pair(unfinishedSymbol, numberRule)).getRightHand();
                         ans.add(rule);
                     }
                     Collections.reverse(ans);
-                    //for(String el: ans) System.out.println(el);
                     return ans;
                 }
 
                 // AFTER SUCCESS; It means that the input stack is empty and we still have input characters
-                if(inputStack.isEmpty()){
+                if (inputStack.isEmpty()) {
                     transitions.setStateMachine("r");
                     continue;
                 }
 
 
                 String element_input_stack = inputStack.peek();
-                if (element_input_stack.compareTo("A") >= 0 && element_input_stack.compareTo("Z") <= 0) {
+                if (checkIsUnfinishedSymbol(element_input_stack)) {
                     transitions = new WorkConfiguration("q", transitions.getPositionInput());
                     workStack.push(element_input_stack + "1");
                     inputStack.pop();
                     String rightHandString = hashMap.get(new Pair(element_input_stack, 1)).getRightHand();
-                    for(int i = rightHandString.length() - 1; i >= 0; i--){
-                        inputStack.push("" + rightHandString.charAt(i));
+                    int i = rightHandString.length() - 1;
+                    while (i >= 0) {
+                        int j = i - 1;
+                        while (j >= 0 && rightHandString.charAt(j) != rightHandString.charAt(i)) {
+                            j--;
+                        }
+                        String aux = rightHandString.substring(j, i + 1);
+                        inputStack.push(aux);
+                        i = j - 1;
                     }
-//                    inputStack.push(hashMap.get(new Pair(element_input_stack, 1)).getRightHand());
                     continue;
                 }
 
                 // avans
-                String inputCharacter = "" + inputSequence.charAt(transitions.getPositionInput());
-                if (inputStack.peek().equals(inputCharacter)) {
+                Integer inputDigit = inputSequence.get(transitions.getPositionInput());
+                String inputString = "'" + lexicalAtomTable.getLexicalAtom(inputDigit).get() + "'";
+                if (inputStack.peek().equals(inputString) || inputStack.peek().equals("'EPS'")) {
                     transitions = new WorkConfiguration("q", transitions.getPositionInput() + 1);
-                    workStack.push(inputCharacter);
+                    workStack.push(inputString);
                     inputStack.pop();
                     continue;
-                }
-                else {
+                } else {
                     // insucces de moment
                     transitions.setStateMachine("r");
                     continue;
                 }
             }
 
-            if(transitions.getStateMachine().equals("r")) {
+            if (transitions.getStateMachine().equals("r")) {
                 // revenire
                 String finishedSymbol = workStack.peek();
-                if (!(finishedSymbol.compareTo("A") >= 0 && finishedSymbol.compareTo("Z") <= 0)) {
+                if (!checkIsUnfinishedSymbol(finishedSymbol)) {
                     transitions.setPositionInput(transitions.getPositionInput() - 1);
                     workStack.pop();
                     inputStack.push(finishedSymbol);
@@ -187,38 +211,65 @@ public class SemanticAnalyzer {
 
                 // another try
                 String unfinishedSymbolPair = workStack.peek();
-                String unfinishedSymbol = "" + unfinishedSymbolPair.charAt(0);
-                Integer numberRule = Integer.parseInt(unfinishedSymbolPair.substring(1));
+                int findDel = 1;
+                while (findDel < unfinishedSymbolPair.length() && unfinishedSymbolPair.charAt(findDel) != '`')
+                    findDel++;
+                findDel++;
+                assert findDel < unfinishedSymbolPair.length();
+                String unfinishedSymbol = unfinishedSymbolPair.substring(0, findDel);
+                Integer numberRule = Integer.parseInt(unfinishedSymbolPair.substring(findDel));
+
                 Integer newNumberRule = numberRule + 1;
-                if(hashMap.get( new Pair(unfinishedSymbol, newNumberRule) ) != null){
+                if (hashMap.get(new Pair(unfinishedSymbol, newNumberRule)) != null) {
                     transitions.setStateMachine("q");
                     workStack.pop();
                     workStack.push(unfinishedSymbol + newNumberRule.toString());
 
-                    String oldRightRule = hashMap.get( new Pair(unfinishedSymbol, numberRule) ).getRightHand();
+                    String oldRightRule = hashMap.get(new Pair(unfinishedSymbol, numberRule)).getRightHand();
+
                     Integer indexPassing = 0;
-                    while(indexPassing < oldRightRule.length()) {
+                    while (indexPassing < oldRightRule.length()) {
+                        int j = indexPassing + 1;
+                        while (j < oldRightRule.length() && oldRightRule.charAt(j) != oldRightRule.charAt(indexPassing))
+                            j++;
+
                         inputStack.pop();
-                        indexPassing++;
+                        indexPassing = j + 1;
                     }
-                    String rightHandString = hashMap.get( new Pair(unfinishedSymbol, newNumberRule) ).getRightHand();
-                    for(int i = rightHandString.length() - 1; i >= 0; i--){
-                        inputStack.push("" + rightHandString.charAt(i));
+                    String rightHandString = hashMap.get(new Pair(unfinishedSymbol, newNumberRule)).getRightHand();
+
+
+                    int i = rightHandString.length() - 1;
+                    while (i >= 0) {
+                        int j = i - 1;
+                        while (j >= 0 && rightHandString.charAt(j) != rightHandString.charAt(i)) {
+                            j--;
+                        }
+                        String aux = rightHandString.substring(j, i + 1);
+                        inputStack.push(aux);
+
+                        i = j - 1;
                     }
-//                    inputStack.push(hashMap.get( new Pair(unfinishedSymbol, newNumberRule) ).getRightHand());
                     continue;
                 }
 
-                if(transitions.getPositionInput().equals(1) && unfinishedSymbol.equals(startSymbol)){
+                if (transitions.getPositionInput().equals(1) && unfinishedSymbol.equals(startSymbol)) {
                     return new ArrayList<String>();
                 }
 
-                // !!
                 workStack.pop();
+                String oldRightRule = hashMap.get(new Pair(unfinishedSymbol, numberRule)).getRightHand();
+                Integer indexPassing = 0;
+                while (indexPassing < oldRightRule.length()) {
+                    int j = indexPassing + 1;
+                    while (j < oldRightRule.length() && oldRightRule.charAt(j) != oldRightRule.charAt(indexPassing))
+                        j++;
+                    inputStack.pop();
+                    indexPassing = j + 1;
+                }
                 inputStack.push(unfinishedSymbol);
             }
-
         }
-
     }
+
 }

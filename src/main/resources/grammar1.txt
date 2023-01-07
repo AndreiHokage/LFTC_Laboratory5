@@ -1,4 +1,4 @@
-S->aSbS
+`S`->'include'`S`'b'`S`
 S->aS
 S->c
 acbc

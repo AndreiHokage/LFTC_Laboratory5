@@ -1,0 +1,29 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+    int n , answer, kop =1;
+    cin>>n;
+    int sumaaa=0x2323;
+    float x = 20.3e-55;
+    int binary=0.1e+555;
+    int y=2.3e4;
+
+    for (int i=0;i  < n;i = i+ 1){
+        int x;
+        for(int y=1;y<u;i=i + 1){
+
+            while(i!=1){
+                i = i + 1;
+                if(o==1){
+                cout << "Andrei este";
+                }
+            }
+
+        }
+        cin>>x;
+        sum=sum+x;
+    }
+    cout<<"Sum:sdf  dsfds "<< sum << 2 + 5454.34;
+    return 0;
+}
